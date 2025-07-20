@@ -34,12 +34,15 @@ class Record:
         self.phones = []
     
     def add_phone(self, phone):
-        self.phone = Phone(phone)
-        self.phones.append(self.phone)
+        phone_obj = Phone(phone)
+        self.phones.append(phone_obj)
 
     def remove_phone(self, phone):
-        self.phone = Phone(phone)
-        self.phones.remove(Phone)
+        for p in self.phones:
+            if p.value == phone:
+                self.phones.remove(p)
+                return
+        raise ValueError(f"Phone number '{phone}' not found.")
 
     def edit_phone(self, old_phone, new_phone):
         if not any(p.value == old_phone for p in self.phones):
