@@ -13,8 +13,6 @@ class Name(Field):
     def __init__(self, value):
         super().__init__(value)
         self.name = value  # для явної відповідності опису
-        if len(self.name) < 2:
-            raise ValueError("Name is too short, need more than 2 symbols")
 
 class Phone(Field):
     # Зберігає об'єкт Phone у атрибуті value та реалізує валідацію
@@ -37,24 +35,25 @@ class Record:
         phone_obj = Phone(phone)
         self.phones.append(phone_obj)
 
-    def remove_phone(self, phone):
-        for p in self.phones:
-            if p.value == phone:
-                self.phones.remove(p)
-                return
-        raise ValueError(f"Phone number '{phone}' not found.")
-
-    def edit_phone(self, old_phone, new_phone):
-        if not any(p.value == old_phone for p in self.phones):
-            raise ValueError(f"Phone number '{old_phone}' not found.")
-
-        self.phones = list(map(
-            lambda p: Phone(new_phone) if p.value == old_phone else p, self.phones ))
-       
     def find_phone(self, target_phone):
          for i in self.phones:
               if i.value == target_phone:
-                    return (i) 
+                    return i 
+
+    def remove_phone(self, phone):
+        phone_obj = self.find_phone(phone)
+        if phone_obj:
+            self.phones.remove(phone_obj)
+        else:
+            raise ValueError(f"Phone number '{phone}' not found.")
+
+    def edit_phone(self, old_phone, new_phone):
+        if self.find_phone(old_phone):
+            self.remove_phone(old_phone)
+            self.add_phone(new_phone)
+        else:
+            raise ValueError(f"Phone number '{old_phone}' not found.")
+       
     # Реалізовано зберігання об'єкта Name в атрибуті name.
     # Реалізовано зберігання списку об'єктів Phone в атрибуті phones.
     # Реалізовано метод для додавання - add_phone .На вхід подається рядок, який містить номер телефона.
@@ -71,20 +70,20 @@ class AddressBook(UserDict):
         return '\n'.join(f"{key}: {value}" for key, value in self.data.items())
       
     def add_record(self, record):
-        self.data[record.name] = record
+        self.data[record.name.value] = record
     
     def find(self, name: str):
-        for record in self.data.values():
-            if record.name.value == name:
-                return record
-        raise ValueError(f"Contact: {name} not found")
+        if name in self.data:
+            return self.data[name]
+        else:
+            return None
+        # raise ValueError(f"Contact: {name} not found")
     
     def delete(self, name: str):
-        for key, record in self.data.items():
-            if record.name.value == name:
-                del self.data[key]
-                return
-        raise ValueError(f"Contact: {name} not found")
+        if name in self.data:
+            del self.data[name]
+        else:
+            raise ValueError(f"Contact: {name} not found")
 
     # Має наслідуватись від класу UserDict .
     # Реалізовано метод add_record, який додає запис до self.data. Записи Record у AddressBook зберігаються як значення у словнику. В якості ключів використовується значення Record.name.value.
