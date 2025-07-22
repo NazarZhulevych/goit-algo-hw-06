@@ -12,7 +12,7 @@ class Name(Field):
     # Зберігає об'єкт Name у атрибуті name (успадковано від Field)
     def __init__(self, value):
         super().__init__(value)
-        self.name = value  # для явної відповідності опису
+        # self.name = value  # для явної відповідності опису
 
 class Phone(Field):
     # Зберігає об'єкт Phone у атрибуті value та реалізує валідацію
@@ -23,8 +23,12 @@ class Phone(Field):
             raise ValueError("Phone number must contain exactly 10 digits.")
 
     def _validate(self, value):
-        digits = ''.join(filter(str.isdigit, str(value)))
-        return len(digits) == 10
+        if str(value).isdigit() and len(str(value)) == 10:
+            return True
+        else:
+            return False
+        #digits = ''.join(filter(str.isdigit, str(value)))
+        #return len(digits) == 10
 
 class Record:
     def __init__(self, name):
@@ -36,9 +40,9 @@ class Record:
         self.phones.append(phone_obj)
 
     def find_phone(self, target_phone):
-         for i in self.phones:
-              if i.value == target_phone:
-                    return i 
+        for i in self.phones:
+         if i.value == target_phone:
+            return i 
 
     def remove_phone(self, phone):
         phone_obj = self.find_phone(phone)
@@ -49,8 +53,8 @@ class Record:
 
     def edit_phone(self, old_phone, new_phone):
         if self.find_phone(old_phone):
-            self.remove_phone(old_phone)
             self.add_phone(new_phone)
+            self.remove_phone(old_phone)
         else:
             raise ValueError(f"Phone number '{old_phone}' not found.")
        
@@ -73,18 +77,11 @@ class AddressBook(UserDict):
         self.data[record.name.value] = record
     
     def find(self, name: str):
-        if name in self.data:
-            return self.data[name]
-        else:
-            return None
-        # raise ValueError(f"Contact: {name} not found")
-    
+        return self.data.get(name) 
+        
     def delete(self, name: str):
-        if name in self.data:
-            del self.data[name]
-        else:
-            raise ValueError(f"Contact: {name} not found")
-
+        del self.data[name]
+        
     # Має наслідуватись від класу UserDict .
     # Реалізовано метод add_record, який додає запис до self.data. Записи Record у AddressBook зберігаються як значення у словнику. В якості ключів використовується значення Record.name.value.
     # Реалізовано метод find, який знаходить запис за ім'ям. На вхід отримує один аргумент - рядок, якій містить ім’я. Повертає об’єкт Record, або None, якщо запис не знайден.
